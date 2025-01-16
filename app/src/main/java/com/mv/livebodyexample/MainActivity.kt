@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity(), SetThresholdDialogFragment.ThresholdDi
             it.setFormat(ImageFormat.NV21)
             it.addCallback(object : SurfaceHolder.Callback, Camera.PreviewCallback {
                 override fun surfaceChanged(
-                    holder: SurfaceHolder?,
+                    holder: SurfaceHolder,
                     format: Int,
                     width: Int,
                     height: Int
@@ -128,13 +128,13 @@ class MainActivity : AppCompatActivity(), SetThresholdDialogFragment.ThresholdDi
                     setCameraDisplayOrientation()
                 }
 
-                override fun surfaceDestroyed(holder: SurfaceHolder?) {
+                override fun surfaceDestroyed(holder: SurfaceHolder) {
                     camera?.setPreviewCallback(null)
                     camera?.release()
                     camera = null
                 }
 
-                override fun surfaceCreated(holder: SurfaceHolder?) {
+                override fun surfaceCreated(holder: SurfaceHolder) {
                     try {
                         camera = Camera.open(cameraId)
                     } catch (e: Exception) {
@@ -231,8 +231,45 @@ class MainActivity : AppCompatActivity(), SetThresholdDialogFragment.ThresholdDi
         camera!!.setDisplayOrientation(result)
     }
 
+    private fun toggleCamera() {
+        // Đóng camera hiện tại
+        camera?.stopPreview()
+        camera?.setPreviewCallback(null)
+        camera?.release()
+        camera = null
+
+        // Đổi trạng thái camera
+        cameraId = if (cameraId == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            Camera.CameraInfo.CAMERA_FACING_BACK
+        } else {
+            Camera.CameraInfo.CAMERA_FACING_FRONT
+        }
+
+        // Mở camera mới
+        try {
+            camera = Camera.open(cameraId)
+            camera?.setPreviewDisplay(binding.surface.holder)
+
+            // Thiết lập lại các thông số
+            val parameters = camera?.parameters
+            parameters?.setPreviewSize(previewWidth, previewHeight)
+            camera?.parameters = parameters
+
+            setCameraDisplayOrientation()
+            camera?.startPreview()
+        } catch (e: Exception) {
+            Log.e(tag, "Không thể chuyển đổi camera: ${e.message}")
+        }
+    }
+
+
     fun setting(@Suppress("UNUSED_PARAMETER") view: View) =
         SetThresholdDialogFragment().show(supportFragmentManager, "dialog")
+
+
+    fun change(@Suppress("UNUSED_PARAMETER") view: View) {
+        toggleCamera()
+    }
 
     override fun onDialogPositiveClick(t: Float) {
         threshold = t
@@ -243,11 +280,12 @@ class MainActivity : AppCompatActivity(), SetThresholdDialogFragment.ThresholdDi
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == permissionReqCode) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 init()
             } else {
-                Toast.makeText(this, "请授权相机权限", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Vui lòng cấp quyền cho máy ảnh", Toast.LENGTH_LONG).show()
             }
         }
     }

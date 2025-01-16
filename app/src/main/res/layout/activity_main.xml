@@ -120,9 +120,18 @@
             android:layout_height="18dp"
             android:layout_alignParentEnd="true"
             android:layout_marginTop="34dp"
-            android:layout_marginEnd="20dp"
-            android:src="@drawable/settings"
-            android:onClick="setting"/>
+            android:layout_marginEnd="347dp"
+            android:onClick="setting"
+            android:src="@drawable/settings" />
+
+<!--        <ImageButton-->
+<!--            android:layout_width="40dp"-->
+<!--            android:layout_height="40dp"-->
+<!--            android:layout_alignParentEnd="true"-->
+<!--            android:layout_marginTop="34dp"-->
+<!--            android:layout_marginEnd="20dp"-->
+<!--            android:src="@drawable/success_icon"-->
+<!--            android:onClick="change"/>-->
 
     </RelativeLayout>
 </layout>
